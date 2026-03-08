@@ -1,0 +1,7 @@
+{
+  "name": "trmnl-weather",
+  "version": "1.0.0",
+  "dependencies": {
+    "canvas": "^2.11.2"
+  }
+}
