@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=800">
+<title>Weather</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 800px;
+    height: 480px;
+    overflow: hidden;
+    background: #fff;
+    color: #000;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .container {
+    width: 800px;
+    height: 480px;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    grid-template-rows: 1fr;
+  }
+
+  /* LEFT PANEL */
+  .left {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 28px 24px 24px 28px;
+    border-right: 1.5px solid #000;
+  }
+
+  .location {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #555;
+  }
+
+  .temp-now {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .temp-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 4px;
+  }
+
+  .temp-value {
+    font-family: 'Instrument Serif', serif;
+    font-size: 96px;
+    line-height: 0.9;
+    letter-spacing: -2px;
+    color: #000;
+  }
+
+  .temp-unit {
+    font-family: 'Instrument Serif', serif;
+    font-size: 36px;
+    vertical-align: super;
+    letter-spacing: 0;
+  }
+
+  .temp-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .temp-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .temp-arrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: #555;
+    width: 14px;
+  }
+
+  .temp-hl {
+    font-family: 'DM Mono', monospace;
+    font-size: 22px;
+    font-weight: 500;
+    color: #000;
+  }
+
+  .temp-hl-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: #888;
+    text-transform: uppercase;
+  }
+
+  .updated-at {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: #bbb;
+    text-transform: uppercase;
+  }
+
+  /* RIGHT PANEL */
+  .right {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 16px 12px 12px;
+  }
+
+  .chart-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 6px;
+    padding-left: 4px;
+  }
+
+  #combined-chart {
+    flex: 1;
+    width: 100%;
+  }
+
+  .legend {
+    display: flex;
+    gap: 18px;
+    padding-left: 4px;
+    margin-top: 4px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: #888;
+    text-transform: uppercase;
+  }
+
+  .legend-line {
+    width: 18px;
+    height: 2px;
+    background: #000;
+  }
+
+  .legend-bar {
+    width: 10px;
+    height: 10px;
+    background: repeating-linear-gradient(
+      45deg,
+      #888,
+      #888 1px,
+      transparent 1px,
+      transparent 4px
+    );
+    border: 1px solid #888;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- LEFT -->
+  <div class="left">
+    <div class="location" id="location-label">New York, NY</div>
+
+    <div class="temp-now">
+      <div class="temp-label">Now</div>
+      <div class="temp-value">
+        <span id="temp-now">--</span><span class="temp-unit">°</span>
+      </div>
+    </div>
+
+    <div class="temp-meta">
+      <div class="temp-row">
+        <span class="temp-arrow">↑</span>
+        <span class="temp-hl" id="high-temp">--°</span>
+        <span class="temp-hl-label">High</span>
+      </div>
+      <div class="temp-row">
+        <span class="temp-arrow">↓</span>
+        <span class="temp-hl" id="low-temp">--°</span>
+        <span class="temp-hl-label">Low</span>
+      </div>
+    </div>
+
+    <div class="updated-at" id="updated-at">—</div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+    <div class="chart-label">Next 12 hours — Temp °F &amp; Precip in.</div>
+    <div id="combined-chart"></div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-line"></div> Temperature</div>
+      <div class="legend-item"><div class="legend-bar"></div> Precipitation</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const apiUrl = "https://api.open-meteo.com/v1/forecast?latitude=40.74353280033631&longitude=-74.00675113622488&hourly=temperature_2m,precipitation&daily=temperature_2m_max,temperature_2m_min&current_weather=true&timezone=America%2FNew_York&temperature_unit=fahrenheit";
+
+function getCurrentLocalHour() {
+  const now = new Date();
+  const localNow = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
+  localNow.setMinutes(0, 0, 0);
+  return localNow.getTime();
+}
+
+function formatTime() {
+  const now = new Date();
+  return now.toLocaleString("en-US", {
+    timeZone: "America/New_York",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    month: "short",
+    day: "numeric"
+  });
+}
+
+fetch(apiUrl)
+  .then(res => res.json())
+  .then(data => {
+    const currentTemp = Math.round(data.current_weather.temperature);
+    document.getElementById("temp-now").textContent = currentTemp;
+    document.getElementById("updated-at").textContent = "Updated " + formatTime();
+
+    const currentHour = getCurrentLocalHour();
+    const hourOfDay = new Date(currentHour).getHours();
+
+    const hourlyTimestamps = data.hourly.time.map(t => new Date(t).getTime());
+    const hourlyTemps = data.hourly.temperature_2m;
+    const hourlyPrecip = data.hourly.precipitation;
+
+    let startIndex = hourlyTimestamps.findIndex(t => t >= currentHour);
+    if (startIndex === -1) startIndex = 0;
+
+    const tempSeries = hourlyTemps.slice(startIndex, startIndex + 12);
+    const precipSeries = hourlyPrecip.slice(startIndex, startIndex + 12);
+    const hours = hourlyTimestamps.slice(startIndex, startIndex + 12);
+
+    let highTemp, lowTemp;
+    if (hourOfDay >= 18) {
+      const remainingHours = hourlyTemps.slice(startIndex);
+      highTemp = Math.round(Math.max(...remainingHours));
+      lowTemp = Math.round(Math.min(...remainingHours));
+    } else {
+      highTemp = Math.round(Math.max(...tempSeries));
+      lowTemp = Math.round(Math.min(...tempSeries));
+    }
+
+    document.getElementById("high-temp").textContent = highTemp + "°";
+    document.getElementById("low-temp").textContent = lowTemp + "°";
+
+    const xCategories = hours.map(ts => {
+      const date = new Date(ts);
+      const hourNum = date.getHours() % 12 || 12;
+      const ampm = date.getHours() < 12 ? 'A' : 'P';
+      return `${hourNum}${ampm}`;
+    });
+
+    const tempMin = Math.floor(Math.min(...tempSeries) / 5) * 5;
+    const tempMax = Math.ceil(Math.max(...tempSeries) / 5) * 5;
+    const precipMax = Math.max(Math.max(...precipSeries) * 1.5, 0.5);
+
+    Highcharts.chart('combined-chart', {
+      chart: {
+        height: 370,
+        width: 556,
+        backgroundColor: '#fff',
+        spacing: [4, 0, 0, 0],
+        animation: false,
+        style: { fontFamily: "'DM Mono', monospace" }
+      },
+      title: { text: null },
+      xAxis: {
+        categories: xCategories,
+        labels: {
+          style: { fontSize: '13px', fontFamily: "'DM Mono', monospace", color: '#444' }
+        },
+        tickWidth: 0,
+        lineWidth: 1,
+        lineColor: '#ccc',
+        gridLineWidth: 1,
+        gridLineDashStyle: 'dot',
+        gridLineColor: '#ddd'
+      },
+      yAxis: [
+        {
+          labels: {
+            formatter: function () { return this.value + '°'; },
+            style: { fontSize: '12px', fontFamily: "'DM Mono', monospace", color: '#444' }
+          },
+          title: { text: null },
+          tickInterval: 5,
+          min: tempMin,
+          max: tempMax,
+          gridLineWidth: 1,
+          gridLineDashStyle: 'dot',
+          gridLineColor: '#ddd'
+        },
+        {
+          labels: {
+            formatter: function () { return this.value.toFixed(1) + '"'; },
+            style: { fontSize: '12px', fontFamily: "'DM Mono', monospace", color: '#999' }
+          },
+          title: { text: null },
+          opposite: true,
+          min: 0,
+          max: precipMax,
+          gridLineWidth: 0
+        }
+      ],
+      plotOptions: {
+        series: {
+          animation: false,
+          enableMouseTracking: false,
+          states: { hover: { enabled: false } },
+          marker: { enabled: false }
+        }
+      },
+      series: [
+        {
+          type: 'spline',
+          name: 'Temperature',
+          data: tempSeries,
+          yAxis: 0,
+          color: '#000',
+          lineWidth: 2.5,
+          zIndex: 2
+        },
+        {
+          type: 'column',
+          name: 'Precipitation',
+          data: precipSeries,
+          yAxis: 1,
+          pointWidth: 14,
+          color: {
+            patternIndex: 0,
+            pattern: {
+              path: {
+                d: 'M 0 10 L 10 0 M -2 2 L 2 -2 M 8 12 L 12 8',
+                strokeWidth: 1.5,
+                stroke: '#666'
+              },
+              width: 10,
+              height: 10,
+              backgroundColor: 'transparent'
+            }
+          },
+          borderWidth: 1,
+          borderColor: '#666',
+          zIndex: 1
+        }
+      ],
+      legend: { enabled: false },
+      tooltip: { enabled: false },
+      credits: { enabled: false }
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+name: Update Weather Screenshot
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'   # every 30 minutes
+  workflow_dispatch:          # allow manual trigger from GitHub UI
+
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Take screenshot
+        run: node screenshot.js
+
+      - name: Commit weather.png
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add weather.png
+          git diff --cached --quiet || git commit -m "Update weather screenshot"
+          git push
