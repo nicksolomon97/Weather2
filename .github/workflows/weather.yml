@@ -1,0 +1,33 @@
+name: Update Weather Screenshot
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install canvas system dependencies
+        run: sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate weather image
+        run: node screenshot.js
+
+      - name: Commit weather.png
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add weather.png
+          git diff --cached --quiet || git commit -m "Update weather screenshot"
+          git push
